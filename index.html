@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVG Cleaner</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>SVG Cleaner</h1>
+            <p>Upload your SVG files to clean them up and optimize for web use</p>
+        </header>
+
+        <main>
+            <div class="upload-section">
+                <div class="file-input-wrapper">
+                    <input type="file" id="fileInput" accept=".svg" multiple>
+                    <label for="fileInput" class="file-input-label">
+                        <span class="upload-icon">[FILE]</span>
+                        Choose SVG Files
+                    </label>
+                </div>
+                <div class="drag-drop-area" id="dragDropArea">
+                    <p>Or drag and drop SVG files here</p>
+                </div>
+            </div>
+
+            <div class="results-section" id="resultsSection" style="display: none;">
+                <h3>Cleaned Files</h3>
+                <div id="fileResults"></div>
+            </div>
+        </main>
+    </div>
+
+    <script src="svg-cleaner.js"></script>
+</body>
+</html>
