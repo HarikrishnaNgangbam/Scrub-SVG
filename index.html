@@ -10,26 +10,35 @@
     <div class="container">
         <header>
             <h1>SVG Cleaner</h1>
-            <p>Upload your SVG files to clean them up and optimize for web use</p>
+            <p>Professional SVG optimization tool for cleaner, faster web graphics</p>
         </header>
 
         <main>
-            <div class="upload-section">
-                <div class="file-input-wrapper">
-                    <input type="file" id="fileInput" accept=".svg" multiple>
-                    <label for="fileInput" class="file-input-label">
-                        <span class="upload-icon">[FILE]</span>
-                        Choose SVG Files
-                    </label>
-                </div>
-                <div class="drag-drop-area" id="dragDropArea">
-                    <p>Or drag and drop SVG files here</p>
-                </div>
+            <div class="results-section" id="resultsSection" style="display: none;">
+                <h3>Optimized Results</h3>
+                <div id="fileResults"></div>
             </div>
 
-            <div class="results-section" id="resultsSection" style="display: none;">
-                <h3>Cleaned Files</h3>
-                <div id="fileResults"></div>
+            <div class="upload-section">
+                <div class="upload-container">
+                    <div class="drag-drop-area" id="dragDropArea">
+                        <div class="upload-content">
+                            <div class="upload-icon">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="7,10 12,15 17,10"/>
+                                    <line x1="12" y1="15" x2="12" y2="3"/>
+                                </svg>
+                            </div>
+                            <h3>Drop your SVG files here</h3>
+                            <p>or click to browse and select files</p>
+                            <div class="supported-formats">
+                                <span>Supported: .svg files</span>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="file" id="fileInput" accept=".svg" multiple>
+                </div>
             </div>
         </main>
     </div>
