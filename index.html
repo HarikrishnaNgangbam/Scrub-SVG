@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SVG Cleaner</title>
     <link rel="stylesheet" href="styles.css">
+    <script type="module" src="https://unpkg.com/@carbon/web-components@latest/es/components/button/index.js"></script>
+    <script type="module" src="https://unpkg.com/@carbon/icons@latest/es/index.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/@carbon/styles@latest/css/styles.min.css">"
 </head>
 <body>
     <div class="container">
@@ -14,25 +17,24 @@
         </header>
 
         <main>
-            <div class="results-section" id="resultsSection" style="display: none;">
-                <h3>Optimized Results</h3>
-                <div id="fileResults"></div>
-            </div>
+            <div id="fileResults" style="display: none;"></div>
 
             <div class="upload-section">
                 <div class="upload-container">
                     <div class="drag-drop-area" id="dragDropArea">
                         <div class="upload-content">
                             <div class="upload-icon">
-                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                    <polyline points="7,10 12,15 17,10"/>
-                                    <line x1="12" y1="15" x2="12" y2="3"/>
+                                <svg width="48" height="48" viewBox="0 0 32 32" fill="currentColor">
+                                    <path d="M26 24v4H6v-4H4v4a2 2 0 0 0 2 2h20a2 2 0 0 0 2-2v-4zM26 14l-1.41-1.41L17 20.17V2h-2v18.17l-7.59-7.58L6 14l10 10 10-10z"/>
                                 </svg>
                             </div>
                             <h3>Drop your SVG files here</h3>
                             <p>or click to browse and select files</p>
                             <div class="supported-formats">
+                                <svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor" style="margin-right: 8px;">
+                                    <path d="M22 22v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9v2H4v22h16v-6z"/>
+                                    <path d="M29.537 5.76 26.24 2.463a1.58 1.58 0 0 0-2.236 0L14 12.467V18h5.533L29.537 7.996a1.58 1.58 0 0 0 0-2.236zM18.533 16H16v-2.533l7.467-7.467 2.533 2.533z"/>
+                                </svg>
                                 <span>Supported: .svg files</span>
                             </div>
                         </div>
