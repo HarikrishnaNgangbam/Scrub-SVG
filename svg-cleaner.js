@@ -552,14 +552,14 @@ class SVGCleaner {
             Cleaned SVG
             </h5>
             <div class="cta-section">
-            <button class="cta-btn copy-btn" onclick="svgCleaner.copyToClipboard(\`${this.escapeHtml(cleanedContent)}\`)">
+            <button class="cta-btn copy-btn" data-content="${this.escapeHtml(cleanedContent)}" data-action="copy">
                 <svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor" style="margin-right: 6px;">
                 <path d="M28 10v18H10V10h18m0-2H10a2 2 0 0 0-2 2v18a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2z"/>
                 <path d="M4 18H2V4a2 2 0 0 1 2-2h14v2H4v14z"/>
                 </svg>
                 Copy Code
             </button>
-            <button class="cta-btn download-btn-inline" onclick="svgCleaner.downloadFile('${this.escapeHtml(fileName)}', \`${this.escapeHtml(cleanedContent)}\`)">
+            <button class="cta-btn download-btn-inline" data-filename="${this.escapeHtml(fileName)}" data-content="${this.escapeHtml(cleanedContent)}" data-action="download">
                 <svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor" style="margin-right: 6px;">
                 <path d="M26 24v4H6v-4H4v4a2 2 0 0 0 2 2h20a2 2 0 0 0 2-2v-4zM26 14l-1.41-1.41L17 20.17V2h-2v18.17l-7.59-7.58L6 14l10 10 10-10z"/>
                 </svg>
@@ -629,6 +629,9 @@ class SVGCleaner {
         `;
         
         fileResults.appendChild(resultDiv);
+        
+        // Setup event listeners for CTA buttons in this result
+        this.setupCTAListeners(resultDiv);
         
         // Insert actual SVG previews
         this.insertSVGPreview(fileId + '_original_preview', originalContent);
@@ -785,6 +788,28 @@ class SVGCleaner {
             previewTabButton.classList.remove('active');
             codeTabContent.classList.add('active');
             previewTabContent.classList.remove('active');
+        }
+    }
+
+    setupCTAListeners(container) {
+        // Add event listeners for Copy and Download buttons within this container
+        const copyBtn = container.querySelector('.copy-btn');
+        const downloadBtn = container.querySelector('.download-btn-inline');
+        
+        if (copyBtn) {
+            copyBtn.addEventListener('click', (e) => {
+                const content = e.target.closest('.copy-btn').dataset.content;
+                this.copyToClipboard(content);
+            });
+        }
+        
+        if (downloadBtn) {
+            downloadBtn.addEventListener('click', (e) => {
+                const button = e.target.closest('.download-btn-inline');
+                const filename = button.dataset.filename;
+                const content = button.dataset.content;
+                this.downloadFile(filename, content);
+            });
         }
     }
 }

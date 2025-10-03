@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <title>Test Icon</title>
+  <desc>A simple test SVG for cleaning</desc>
+  <g transform="translate(10,10)">
+    <circle cx="40" cy="40" r="30" fill="#ff6b6b" stroke="#000" stroke-width="2"/>
+    <rect x="20" y="20" width="40" height="40" fill="none" stroke="#333" stroke-width="1"/>
+  </g>
+  <metadata>
+    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+      <cc:Work xmlns:cc="http://creativecommons.org/ns#">
+        <dc:format>image/svg+xml</dc:format>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+</svg>
