@@ -361,7 +361,7 @@ main {
     background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
     border: none;
     border-radius: 0;
-    padding: 15px;
+    padding: 20px;
     text-align: center;
     height: auto;
     min-height: 150px;
@@ -377,7 +377,7 @@ main {
 
 .svg-preview svg {
     max-width: 100%;
-    max-height: 120px;
+    max-height: 100%;
     width: auto;
     height: auto;
     filter: drop-shadow(0 2px 8px rgba(0,0,0,0.1));
@@ -474,12 +474,15 @@ main {
     .svg-preview {
         height: auto;
         min-height: 80px;
-        padding: 10px;
+        padding: 15px;
         margin: 8px;
     }
     
     .svg-preview svg {
-        max-height: 60px;
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
     }
     
     .code-preview {

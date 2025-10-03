@@ -680,17 +680,26 @@ class SVGCleaner {
             // Clone the SVG and ensure it has proper sizing for preview
             const svgClone = svg.cloneNode(true);
             
-            // Remove any width/height and ensure proper viewBox for preview
+            // Remove any width/height and set proper styles for preview
             svgClone.removeAttribute('width');
             svgClone.removeAttribute('height');
-            svgClone.style.width = '100%';
-            svgClone.style.height = '100%';
+            svgClone.style.width = 'auto';
+            svgClone.style.height = 'auto';
             svgClone.style.maxWidth = '100%';
-            svgClone.style.maxHeight = '60px';
+            svgClone.style.maxHeight = '100%';
             
             // Ensure the SVG has a viewBox for proper scaling
             if (!svgClone.getAttribute('viewBox')) {
-                svgClone.setAttribute('viewBox', '0 0 100 100');
+                // Try to get dimensions from original attributes or set default
+                const originalWidth = svg.getAttribute('width') || '100';
+                const originalHeight = svg.getAttribute('height') || '100';
+                const w = parseFloat(originalWidth);
+                const h = parseFloat(originalHeight);
+                if (!isNaN(w) && !isNaN(h)) {
+                    svgClone.setAttribute('viewBox', `0 0 ${w} ${h}`);
+                } else {
+                    svgClone.setAttribute('viewBox', '0 0 100 100');
+                }
             }
             
             previewElement.innerHTML = '';
