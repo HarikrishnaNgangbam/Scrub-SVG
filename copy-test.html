@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Copy Test</title>
+</head>
+<body>
+    <h1>Test Copy Function</h1>
+    <button id="testBtn" data-content="&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 100 100&quot;&gt;&lt;circle cx=&quot;50&quot; cy=&quot;50&quot; r=&quot;25&quot; fill=&quot;red&quot;/&gt;&lt;/svg&gt;">
+        Test Copy
+    </button>
+    <p id="status"></p>
+    
+    <script>
+        function unescapeHtml(text) {
+            const div = document.createElement('div');
+            div.innerHTML = text;
+            return div.textContent || div.innerText || '';
+        }
+        
+        async function copyToClipboard(content) {
+            try {
+                await navigator.clipboard.writeText(content);
+                document.getElementById('status').textContent = 'Copy successful!';
+                document.getElementById('status').style.color = 'green';
+                console.log('Copied:', content);
+                return true;
+            } catch (err) {
+                document.getElementById('status').textContent = 'Copy failed: ' + err.message;
+                document.getElementById('status').style.color = 'red';
+                console.error('Copy failed:', err);
+                
+                // Fallback
+                try {
+                    const textArea = document.createElement('textarea');
+                    textArea.value = content;
+                    textArea.style.position = 'fixed';
+                    textArea.style.left = '-9999px';
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    const success = document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    
+                    if (success) {
+                        document.getElementById('status').textContent = 'Fallback copy successful!';
+                        document.getElementById('status').style.color = 'green';
+                        return true;
+                    }
+                } catch (fallbackErr) {
+                    console.error('Fallback failed:', fallbackErr);
+                }
+                return false;
+            }
+        }
+        
+        document.getElementById('testBtn').addEventListener('click', function() {
+            const escapedContent = this.dataset.content;
+            const content = unescapeHtml(escapedContent);
+            console.log('Escaped:', escapedContent);
+            console.log('Unescaped:', content);
+            copyToClipboard(content);
+        });
+    </script>
+</body>
+</html>

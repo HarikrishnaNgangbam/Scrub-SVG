@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Copy Function</title>
+</head>
+<body>
+    <h1>Debug Copy Function</h1>
+    
+    <button id="testCopy" data-content="&lt;svg viewBox=&quot;0 0 100 100&quot;&gt;&lt;circle cx=&quot;50&quot; cy=&quot;50&quot; r=&quot;40&quot;/&gt;&lt;/svg&gt;">
+        Test Copy
+    </button>
+    
+    <div id="result"></div>
+    
+    <script>
+        function unescapeHtml(text) {
+            const div = document.createElement('div');
+            div.innerHTML = text;
+            return div.textContent || div.innerText || '';
+        }
+        
+        async function copyToClipboard(content) {
+            try {
+                console.log('Attempting to copy:', content);
+                await navigator.clipboard.writeText(content);
+                console.log('Copy successful!');
+                document.getElementById('result').innerHTML = '<p style="color: green;">Copied successfully!</p>';
+                return true;
+            } catch (err) {
+                console.error('Copy failed:', err);
+                document.getElementById('result').innerHTML = '<p style="color: red;">Copy failed: ' + err.message + '</p>';
+                return false;
+            }
+        }
+        
+        document.getElementById('testCopy').addEventListener('click', function(e) {
+            const escapedContent = e.target.dataset.content;
+            const content = unescapeHtml(escapedContent);
+            console.log('Escaped content:', escapedContent);
+            console.log('Unescaped content:', content);
+            copyToClipboard(content);
+        });
+    </script>
+</body>
+</html>

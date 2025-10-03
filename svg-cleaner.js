@@ -113,8 +113,12 @@ class SVGCleaner {
         const serializer = new XMLSerializer();
         let cleanedContent = serializer.serializeToString(svg);
         
+        console.log('Raw serialized content:', cleanedContent);
+        
         // Clean up the XML declaration and format
         cleanedContent = this.formatSVG(cleanedContent);
+        
+        console.log('Final cleaned content:', cleanedContent);
         
         return cleanedContent;
     }
@@ -131,7 +135,7 @@ class SVGCleaner {
             elements.forEach(el => el.remove());
         });
 
-        // Remove editor-specific attributes
+        // Remove editor-specific attributes (but preserve main SVG namespace)
         const editorAttributes = [
             'inkscape:version', 'inkscape:export-filename', 'inkscape:export-xdpi',
             'inkscape:export-ydpi', 'sodipodi:docname', 'xmlns:inkscape',
@@ -139,6 +143,11 @@ class SVGCleaner {
         ];
 
         this.removeAttributesRecursively(svg, editorAttributes);
+        
+        // Ensure the main SVG namespace is preserved
+        if (!svg.getAttribute('xmlns')) {
+            svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+        }
         
         // Remove XML comments
         this.removeComments(svg);
@@ -475,12 +484,21 @@ class SVGCleaner {
     formatSVG(svgString) {
         // Clean up the SVG string formatting
         let cleanedString = svgString
-            .replace(/^\s*<\?xml[^>]*\?>\s*/, '') // Remove XML declaration
+            .replace(/^\s*<\?xml[^>]*\?>\s*/, '') // Remove existing XML declaration
             .replace(/>\s+</g, '><') // Remove whitespace between tags
             .replace(/\s+/g, ' ') // Normalize whitespace
             .replace(/[\u200B-\u200D\uFEFF]/g, '') // Remove zero-width characters
             .trim();
         
+        // Ensure the SVG has proper namespace if missing
+        if (!cleanedString.includes('xmlns="http://www.w3.org/2000/svg"')) {
+            cleanedString = cleanedString.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
+        }
+        
+        // Add proper XML declaration for standalone SVG files
+        cleanedString = '<?xml version="1.0" encoding="UTF-8"?>\n' + cleanedString;
+        
+        console.log('Formatted SVG output:', cleanedString);
         return cleanedString;
     }
 
@@ -500,6 +518,15 @@ class SVGCleaner {
         
         // Create unique IDs for this file result
         const fileId = 'file_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        
+        // Debug: Log the cleaned content
+        console.log('=== CLEANED SVG DEBUG ===');
+        console.log('Cleaned content length:', cleanedContent.length);
+        console.log('Cleaned content:', cleanedContent);
+        console.log('FileName:', fileName);
+        console.log('Escaped cleaned content:', this.escapeHtml(cleanedContent));
+        console.log('Escaped filename:', this.escapeHtml(fileName));
+        console.log('=========================');
         
         resultDiv.innerHTML = `
             <div class="before-after">
@@ -552,14 +579,14 @@ class SVGCleaner {
             Cleaned SVG
             </h5>
             <div class="cta-section">
-            <button class="cta-btn copy-btn" data-content="${this.escapeHtml(cleanedContent)}" data-action="copy">
+            <button class="cta-btn copy-btn" data-action="copy">
                 <svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor" style="margin-right: 6px;">
                 <path d="M28 10v18H10V10h18m0-2H10a2 2 0 0 0-2 2v18a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2z"/>
                 <path d="M4 18H2V4a2 2 0 0 1 2-2h14v2H4v14z"/>
                 </svg>
                 Copy Code
             </button>
-            <button class="cta-btn download-btn-inline" data-filename="${this.escapeHtml(fileName)}" data-content="${this.escapeHtml(cleanedContent)}" data-action="download">
+            <button class="cta-btn download-btn-inline" data-action="download">
                 <svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor" style="margin-right: 6px;">
                 <path d="M26 24v4H6v-4H4v4a2 2 0 0 0 2 2h20a2 2 0 0 0 2-2v-4zM26 14l-1.41-1.41L17 20.17V2h-2v18.17l-7.59-7.58L6 14l10 10 10-10z"/>
                 </svg>
@@ -630,12 +657,32 @@ class SVGCleaner {
         
         fileResults.appendChild(resultDiv);
         
-        // Setup event listeners for CTA buttons in this result
-        this.setupCTAListeners(resultDiv);
+        // Store the content directly on the buttons after DOM creation (avoid template literal escaping issues)
+        const copyBtn = resultDiv.querySelector('.copy-btn');
+        const downloadBtn = resultDiv.querySelector('.download-btn-inline');
+        
+        if (copyBtn) {
+            copyBtn.dataset.content = this.escapeHtml(cleanedContent);
+            console.log('Copy button data-content set:', copyBtn.dataset.content);
+            console.log('Copy button data-content length:', copyBtn.dataset.content ? copyBtn.dataset.content.length : 'NULL');
+        }
+        
+        if (downloadBtn) {
+            downloadBtn.dataset.filename = this.escapeHtml(fileName);
+            downloadBtn.dataset.content = this.escapeHtml(cleanedContent);
+            console.log('Download button data-filename set:', downloadBtn.dataset.filename);
+            console.log('Download button data-content set:', downloadBtn.dataset.content);
+            console.log('Download button data-content length:', downloadBtn.dataset.content ? downloadBtn.dataset.content.length : 'NULL');
+        }
         
         // Insert actual SVG previews
         this.insertSVGPreview(fileId + '_original_preview', originalContent);
         this.insertSVGPreview(fileId + '_cleaned_preview', cleanedContent);
+        
+        // Setup event listeners for CTA buttons in this result (after DOM is ready)
+        setTimeout(() => {
+            this.setupCTAListeners(resultDiv);
+        }, 0);
     }
 
     displayError(fileName, errorMessage) {
@@ -737,27 +784,70 @@ class SVGCleaner {
 
     async copyToClipboard(content) {
         try {
+            console.log('Attempting to copy content length:', content.length);
+            console.log('Content preview:', content.substring(0, 100) + '...');
+            
+            // Check if clipboard API is available
+            if (!navigator.clipboard) {
+                throw new Error('Clipboard API not available');
+            }
+            
             await navigator.clipboard.writeText(content);
+            console.log('Successfully copied to clipboard');
+            
             // Show temporary feedback
             const copyBtns = document.querySelectorAll('.copy-btn');
             copyBtns.forEach(btn => {
-                const originalText = btn.textContent;
-                btn.textContent = 'Copied!';
+                const originalText = btn.innerHTML;
+                btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor" style="margin-right: 6px;">
+                    <path d="M13 24l-9-9 1.414-1.414L13 21.171 26.586 7.586 28 9 13 24z"/>
+                </svg>Copied!`;
                 btn.style.background = '#059669';
                 setTimeout(() => {
-                    btn.textContent = originalText;
+                    btn.innerHTML = originalText;
                     btn.style.background = '';
                 }, 2000);
             });
         } catch (err) {
             console.error('Failed to copy: ', err);
+            alert('Copy failed: ' + err.message + '. Please copy manually from the code view.');
+            
             // Fallback for older browsers
-            const textArea = document.createElement('textarea');
-            textArea.value = content;
-            document.body.appendChild(textArea);
-            textArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textArea);
+            console.log('Using fallback copy method');
+            try {
+                const textArea = document.createElement('textarea');
+                textArea.value = content;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-9999px';
+                document.body.appendChild(textArea);
+                textArea.select();
+                textArea.setSelectionRange(0, 99999); // For mobile devices
+                const success = document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                if (success) {
+                    console.log('Fallback copy successful');
+                    // Show temporary feedback for fallback too
+                    const copyBtns = document.querySelectorAll('.copy-btn');
+                    copyBtns.forEach(btn => {
+                        const originalText = btn.innerHTML;
+                        btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 32 32" fill="currentColor" style="margin-right: 6px;">
+                            <path d="M13 24l-9-9 1.414-1.414L13 21.171 26.586 7.586 28 9 13 24z"/>
+                        </svg>Copied!`;
+                        btn.style.background = '#059669';
+                        setTimeout(() => {
+                            btn.innerHTML = originalText;
+                            btn.style.background = '';
+                        }, 2000);
+                    });
+                } else {
+                    console.error('Fallback copy failed');
+                    alert('Copy failed. Please manually select and copy the code from the code view.');
+                }
+            } catch (fallbackErr) {
+                console.error('Fallback copy error:', fallbackErr);
+                alert('Copy not supported in this browser. Please manually select and copy the code.');
+            }
         }
     }
 
@@ -765,6 +855,12 @@ class SVGCleaner {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    unescapeHtml(text) {
+        const div = document.createElement('div');
+        div.innerHTML = text;
+        return div.textContent || div.innerText || '';
     }
 
     switchTab(panelId, tabType) {
@@ -793,24 +889,59 @@ class SVGCleaner {
 
     setupCTAListeners(container) {
         // Add event listeners for Copy and Download buttons within this container
-        const copyBtn = container.querySelector('.copy-btn');
-        const downloadBtn = container.querySelector('.download-btn-inline');
+        // Look for buttons in both visible and hidden tab content
+        const copyBtns = container.querySelectorAll('.copy-btn');
+        const downloadBtns = container.querySelectorAll('.download-btn-inline');
         
-        if (copyBtn) {
-            copyBtn.addEventListener('click', (e) => {
-                const content = e.target.closest('.copy-btn').dataset.content;
-                this.copyToClipboard(content);
-            });
-        }
+        console.log('Setting up CTA listeners, found copy buttons:', copyBtns.length);
+        console.log('Setting up CTA listeners, found download buttons:', downloadBtns.length);
         
-        if (downloadBtn) {
-            downloadBtn.addEventListener('click', (e) => {
-                const button = e.target.closest('.download-btn-inline');
-                const filename = button.dataset.filename;
-                const content = button.dataset.content;
-                this.downloadFile(filename, content);
-            });
-        }
+        copyBtns.forEach(copyBtn => {
+            if (copyBtn) {
+                copyBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Copy button clicked!');
+                    const button = e.target.closest('.copy-btn');
+                    const escapedContent = button.dataset.content;
+                    console.log('Escaped content from dataset:', escapedContent ? escapedContent.substring(0, 100) + '...' : 'NULL');
+                    // Unescape the HTML-escaped content
+                    const content = this.unescapeHtml(escapedContent);
+                    console.log('Unescaped content:', content ? content.substring(0, 100) + '...' : 'NULL');
+                    console.log('Content length:', content ? content.length : 'NULL');
+                    if (content) {
+                        this.copyToClipboard(content);
+                    } else {
+                        console.error('No content to copy!');
+                        alert('No content to copy. Please try again.');
+                    }
+                });
+            }
+        });
+        
+        downloadBtns.forEach(downloadBtn => {
+            if (downloadBtn) {
+                downloadBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Download button clicked!');
+                    const button = e.target.closest('.download-btn-inline');
+                    const filename = button.dataset.filename;
+                    const escapedContent = button.dataset.content;
+                    console.log('Download filename:', filename);
+                    console.log('Download escaped content:', escapedContent ? escapedContent.substring(0, 100) + '...' : 'NULL');
+                    // Unescape the HTML-escaped content
+                    const content = this.unescapeHtml(escapedContent);
+                    console.log('Download unescaped content:', content ? content.substring(0, 100) + '...' : 'NULL');
+                    if (content && filename) {
+                        this.downloadFile(filename, content);
+                    } else {
+                        console.error('Missing content or filename for download!');
+                        alert('Download failed. Missing content or filename.');
+                    }
+                });
+            }
+        });
     }
 }
 
