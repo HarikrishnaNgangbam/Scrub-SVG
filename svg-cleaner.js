@@ -687,6 +687,8 @@ class SVGCleaner {
             svgClone.style.height = 'auto';
             svgClone.style.maxWidth = '100%';
             svgClone.style.maxHeight = '100%';
+            svgClone.style.display = 'block';
+            svgClone.style.margin = '0 auto';
             
             // Ensure the SVG has a viewBox for proper scaling
             if (!svgClone.getAttribute('viewBox')) {
@@ -704,6 +706,11 @@ class SVGCleaner {
             
             previewElement.innerHTML = '';
             previewElement.appendChild(svgClone);
+            
+            // Debug: Log SVG element properties
+            console.log('SVG Preview Element:', previewElement);
+            console.log('SVG Clone:', svgClone);
+            console.log('SVG ViewBox:', svgClone.getAttribute('viewBox'));
             
         } catch (error) {
             console.error('Error creating SVG preview:', error);
